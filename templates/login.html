@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Login - Quiz App</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+    <style>
+        body {
+            background-color: #222;
+            color: #fff;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            max-width: 400px;
+            background: #333;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        button {
+            width: 100%;
+            background: #444;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #666;
+        }
+        .error-message {
+            color: red;
+            margin-top: 10px;
+        }
+        a {
+            color: #0f9;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <h2>Login</h2>
+        <div class="form-group">
+            <input type="text" id="username" placeholder="Username" required>
+        </div>
+        <div class="form-group">
+            <input type="password" id="password" placeholder="Password" required>
+        </div>
+        <button onclick="login()">Login</button>
+        <p class="error-message" id="error-msg"></p>
+        <p>Don't have an account? <a href="/register">Register</a></p>
+    </div>
+
+    <script>
+        function login() {
+            const username = document.getElementById("username").value.trim();
+            const password = document.getElementById("password").value.trim();
+            const errorMsg = document.getElementById("error-msg");
+
+            if (!username || !password) {
+                errorMsg.textContent = "Please enter both username and password!";
+                return;
+            }
+
+            fetch("/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username, password })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    window.location.href = "/";  // Redirect to quiz
+                } else {
+                    errorMsg.textContent = data.message;
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                errorMsg.textContent = "An error occurred. Please try again.";
+            });
+        }
+    </script>
+
+</body>
+</html>
