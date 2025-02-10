@@ -28,7 +28,14 @@ def save_users(users):
     with open(USER_DATA_FILE, "w") as file:
         json.dump(users, file, indent=4)
 
-# Register route
+# Home Route (Redirects to Quiz)
+@app.route("/")
+def home():
+    if "user" not in session:
+        return redirect("/login")
+    return redirect("/quiz")
+
+# Register Route
 @app.route("/register", methods=["POST"])
 def register():
     data = request.json
@@ -41,7 +48,7 @@ def register():
     save_users(users)
     return jsonify({"status": "success", "message": "Registration successful!"})
 
-# Login route (Supports both GET and POST)
+# Login Route (Supports GET and POST)
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -54,23 +61,22 @@ def login():
         
         return jsonify({"status": "error", "message": "Invalid username or password!"}), 400
     
-    # Render login page for GET requests
-    return render_template("login.html")
+    return render_template("login.html")  # Make sure this file exists in `templates/`
 
-# Logout route
+# Logout Route
 @app.route("/logout")
 def logout():
     session.pop("user", None)
-    return redirect("/")
+    return redirect("/login")
 
-# Serve the quiz page
-@app.route("/")
+# Quiz Page Route
+@app.route("/quiz")
 def quiz():
     if "user" not in session:
         return redirect("/login")
     return render_template("quiz.html", questions=quiz_questions, username=session["user"])
 
-# Score submission route
+# Score Submission Route
 @app.route("/submit_score", methods=["POST"])
 def submit_score():
     if "user" not in session:
@@ -92,6 +98,8 @@ def submit_score():
 
     return jsonify({"status": "success", "message": "Score saved successfully!"})
 
-# Run the Flask app
+# Run the Flask App with Waitress
 if __name__ == "__main__":
-    app.run(debug=True)
+    from waitress import serve
+    serve(app, host="0.0.0.0", port=8080)
+ 
